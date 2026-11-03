@@ -32,7 +32,7 @@ jobs:
         id: build
         uses: geode-sdk/build-geode-mod@main
         with:
-          sdk: stable
+          sdk: given
           target: ${{ matrix.target }}
       - name: Upload package
         uses: actions/upload-artifact@v7
