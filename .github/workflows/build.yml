@@ -17,7 +17,7 @@ jobs:
             os: ubuntu-latest
             target: Android64
           - name: iOS
-            os: macos-15
+            os: macos-latest
             target: iOS
             configure-args: '-DCMAKE_PROJECT_GeodeBindings_INCLUDE="$GITHUB_WORKSPACE/ios-fmod-fix.cmake"'
     name: Build ${{ matrix.name }}
