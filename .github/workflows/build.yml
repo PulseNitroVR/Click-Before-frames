@@ -29,6 +29,18 @@ jobs:
           python-version: "3.x"
       - name: Extract source archive
         run: python -c "import zipfile; zipfile.ZipFile('click-before-frames-source-upload-20261103.zip').extractall('.')"
+      - name: Set a fork-specific mod ID
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          manifest = Path("mod.json")
+          data = manifest.read_text(encoding="utf-8")
+          old_id = '"id": "pulse.input-buffer"'
+          if data.count(old_id) != 1:
+              raise SystemExit("Expected the original mod ID exactly once")
+          manifest.write_text(data.replace(old_id, '"id": "pulse.input-buffer-custom"'), encoding="utf-8")
+          PY
       - name: Add FMOD declarations for iOS bindings
         if: matrix.name == 'iOS'
         shell: bash
