@@ -19,6 +19,7 @@ jobs:
           - name: iOS
             os: macos-latest
             target: iOS
+            configure-args: '-DCMAKE_PROJECT_GeodeBindings_INCLUDE="$GITHUB_WORKSPACE/ios-fmod-fix.cmake"'
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     steps:
@@ -28,16 +29,30 @@ jobs:
           python-version: "3.x"
       - name: Extract source archive
         run: python -c "import zipfile; zipfile.ZipFile('click-before-frames-source-upload-20261103.zip').extractall('.')"
+      - name: Add FMOD declarations for iOS bindings
+        if: matrix.name == 'iOS'
+        shell: bash
+        run: |
+          cat > ios-fmod-fix.cmake <<'EOF'
+          cmake_language(DEFER CALL target_compile_options GeodeBindings PRIVATE "-include" "Geode/fmod/fmod.h")
+          EOF
       - name: Build the mod
         id: build
         uses: geode-sdk/build-geode-mod@main
         with:
           sdk: given
           target: ${{ matrix.target }}
+          configure-args: ${{ matrix.configure-args }}
+      - name: Collect package
+        shell: bash
+        run: |
+          mkdir -p output
+          find build -type f -name '*.geode' -exec cp '{}' output/ \;
+          test -n "$(find output -type f -name '*.geode' -print -quit)"
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.name }}-geode
-          path: ${{ steps.build.outputs.build-output }}
+          path: output/*.geode
           if-no-files-found: error
           retention-days: 14
